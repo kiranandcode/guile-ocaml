@@ -1,0 +1,20 @@
+(lang dune 2.9)
+(package
+ (name guile)
+ (synopsis "Bindings to GNU Guile Scheme for OCaml")
+ (description
+   "The guile library is Free Software high-level OCaml bindings to GNU Guile 3.0, supporting easy interop between OCaml and GNU Guile Scheme.")
+ (depends
+  (ocaml (>= 4.08.0))
+  (conf-swi-prolog (>= 1))
+  (ctypes (>= 0.18.0))
+  (ppx_deriving (>= 2.0))
+  (dune-configurator (>= 2.9.1))))
+(generate_opam_files true)
+(license GPL-3.0+)
+(source (uri git+https://gitlab.com/gopiandcode/guile-ocaml.git))
+(bug_reports https://gitlab.com/gopiandcode/guile-ocaml/issues)
+(homepage https://gitlab.com/gopiandcode/guile-ocaml)
+(name guile)
+(authors "Kiran Gopinathan")
+(maintainers "kirang@comp.nus.edu.sg")
