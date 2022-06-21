@@ -20,3 +20,17 @@ let scm_with_guile =
     (InitCallback.t @-> ptr void @-> returning (ptr void))
 let scm_with_guile f  v =
   scm_with_guile (InitCallback.of_fun f) v
+
+let scm_init_guile =
+  Foreign.foreign "scm_init_guile"
+    (void @-> returning void)
+
+let scm_shell =
+  Foreign.foreign "scm_shell"
+    (int @-> ptr string @-> returning void)
+
+let scm_shell argv =
+  let argc = Array.length argv in
+  let argv =  Ctypes.CArray.of_list string (Array.to_list argv) in
+  scm_shell argc (CArray.start argv)
+  
