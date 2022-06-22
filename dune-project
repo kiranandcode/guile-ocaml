@@ -18,3 +18,4 @@
 (name guile)
 (authors "Kiran Gopinathan")
 (maintainers "kirang@comp.nus.edu.sg")
+(use_standard_c_and_cxx_flags true)

@@ -1,5 +1,5 @@
 (*
-GNU Guile OCaml Bindings
+gnu Guile OCaml Bindings
 
 Copyright (C) 2021  Kiran Gopinathan
 
@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 [@@@warning "-50"]
 
 module Stubs = functor (T: Cstubs_structs.TYPE) -> struct
-    (* let pl_variable = T.constant "PL_VARIABLE" T.int *)
+
+  let scml_bool_f = T.constant "SCM_BOOL_F" T.(intptr_t)
+  let scml_bool_t = T.constant "SCM_BOOL_T" T.(intptr_t)
+  let scm_eol = T.constant "SCM_EOL" T.(intptr_t)
 
 end
 
