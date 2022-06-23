@@ -1,0 +1,2 @@
+(executable (name turtle_program)
+ (libraries guile graphics))

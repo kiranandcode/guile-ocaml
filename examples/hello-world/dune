@@ -1,3 +1,2 @@
 (executable (name hello_world)
- (libraries guile)
- (preprocess (pps ppx_sexp_value ppx_deriving.std)))
+ (libraries guile))
