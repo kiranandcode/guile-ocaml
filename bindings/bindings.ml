@@ -23,6 +23,7 @@ module Stubs = functor (T: Cstubs_structs.TYPE) -> struct
   let scml_bool_f = T.constant "SCM_BOOL_F" T.(intptr_t)
   let scml_bool_t = T.constant "SCM_BOOL_T" T.(intptr_t)
   let scm_eol = T.constant "SCM_EOL" T.(intptr_t)
+  let scm_undefined = T.constant "SCM_UNDEFINED" T.(intptr_t)
 
 end
 
