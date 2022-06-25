@@ -1,2 +1,0 @@
-(executable (name interactive_shell)
- (libraries guile))

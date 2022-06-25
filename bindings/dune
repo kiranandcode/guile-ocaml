@@ -1,5 +1,0 @@
-(library
- (name bindings)
- (public_name guile.__private__.bindings)
- (synopsis "Ctypes bindings to describe the GNU Guile FFI.")
- (libraries ctypes.stubs ctypes))

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>index (guile.index)</title><link rel="stylesheet" href="../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc 2.1.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – guile</nav><header class="odoc-preamble"><h1 id="top"><a href="#top" class="anchor"></a>Guile</h1><p>Guile-ocaml is a Free Software library that provides high-level OCaml bindings to the FFI interface for GNU Guile Scheme. The aim of these bindings are to provide an easy way for OCaml developers to extend their OCaml applications with GNU Guile scheme scripting capabilities, providing simple combinators to translate terms and send queries between the two languages.</p><pre><code>(* initialise GNU Guile *)
+let () = Guile.init () in
+(* expose OCaml functions to Guile scheme *)
+let _ = Guile.Functions.register_fun1 &quot;my-fun&quot; ~no_opt:1
+    (fun _ -&gt; print_endline &quot;hello world!&quot;; Guile.eol) in
+(* start guile repl *)
+Guile.shell ()</code></pre><p>The rest of this page will provide a simple quick-start guide to using <a href="#top">Guile</a>. We will look at using it to build a simple turtle drawing program. Advanced users may instead want to check out the <a href="Guile/index.html">API documentation</a>.</p></header><nav class="odoc-toc"><ul><li><a href="#writing-a-turtle-drawing-program-with-gnu-guile">Writing a turtle drawing program with GNU Guile</a></li></ul></nav><div class="odoc-content"><h2 id="writing-a-turtle-drawing-program-with-gnu-guile"><a href="#writing-a-turtle-drawing-program-with-gnu-guile" class="anchor"></a>Writing a turtle drawing program with GNU Guile</h2><p>For this example, we will be using OCaml's graphics library. You can find the complete project under <code>examples/turtle-program</code> on the <code>ocaml-guile</code> repo.</p><p>Before we go any further, let's make sure the Guile context has been initialised:</p><pre><code>let () = Guile.init ()</code></pre><p>Now, with that out of the way, let's get started with defining the behaviours of our turtle.</p><p>The first thing we'll need is an ADT to represent the direction and movement of the turtle:</p><pre><code>type direction = Up | Down | Left | Right
+
+let turn_right = function Up -&gt; Left | Left -&gt; Down | Down -&gt; Right | Right -&gt; Up
+let turn_left = function Left -&gt; Up | Down -&gt; Left | Right -&gt; Down | Up -&gt; Right
+
+let move n (x,y) = function
+  | Up -&gt; (x, y + n)
+  | Down -&gt; (x, y - n)
+  | Left -&gt; (x - n, y)
+  | Right -&gt; (x + n, y)</code></pre><p>Now, for the purposes of this tutorial, we'll be using some global state to track the properties of our turtle:</p><pre><code>(* whether the turtle's pen is down or up *)
+let pen_down = ref false
+(* direction that the turtle is facing *)
+let direction = ref Up</code></pre><p>Next, let's define some OCaml functions to update the state of the turtle.</p><p>Because we want to call these functions from within Guile, these manipulation functions must take in and return values of type <a href="Guile/index.html#type-scm"><code>Guile.scm</code></a> (an abstract type that encodes Guile runtime values).</p><p>As an example, here's a function <code>set_pen_down: Guile.scm -&gt;
+Guile.scm</code> that, when called with a <a href="Guile/index.html#type-scm"><code>Guile.scm</code></a> boolean value, updates the state of the turtle's pen with the requested value:</p><pre><code>let set_pen_down v =
+  if not @@ Guile.Bool.is_bool v then
+    failwith &quot;expected boolean argument&quot;;
+  let v = Guile.Bool.from_raw v in
+  pen_down := v;
+  Guile.eol</code></pre><p>The function first validates the type of its argument using the <a href="Guile/Bool/index.html#val-is_bool"><code>Guile.Bool.is_bool</code></a> helper function. If provided an incorrect type, it raises an OCaml exception (internally this will be caught and exposed to the Guile runtime as a Guile exception). After validating the type, we can then extract the concrete boolean value using <code>Guile.Bool.from_raw</code> and then use normal OCaml code to update the state of the <code>pen_down</code> variable. Finally, as Guile Scheme is an expression oriented language, our callbacks have to return a <code>Guile.scm</code> value - in this case we return the equivalent <code>unit</code> in Guile: <a href="Guile/index.html#val-eol"><code>Guile.eol</code></a>.</p><p>To allow this function to be called from within a Guile context, we can <i>expose</i> the function under the name <code>pen-down</code> using the functions in <a href="Guile/Functions/index.html"><code>Guile.Functions</code></a> - in this case <a href="Guile/Functions/index.html#val-register_fun1"><code>Guile.Functions.register_fun1</code></a>:</p><pre><code>let () = ignore @@ Guile.Functions.register_fun1 &quot;pen-down&quot; set_pen_down</code></pre><p>Following this pattern, we can also define a few other helper functions to manipulate the turtle's state:</p><p>Firstly, a few functions to change the direction of the turtle:</p><pre><code>let turn_left _ =
+  direction := turn_left !direction;
+  Guile.eol
+
+let turn_right _ =
+  direction := turn_right !direction;
+  Guile.eol
+
+let () =
+    Guile.Functions.register_fun1 ~no_opt:1 &quot;turn-left&quot; turn_left;
+    Guile.Functions.register_fun1 ~no_opt:1 &quot;turn-right&quot; turn_right</code></pre><p>Here, as turn_left and turn_right don't require any arguments, we use the <code>~no_opt</code> parameter of <a href="Guile/Functions/index.html#val-register_fun1"><code>Guile.Functions.register_fun1</code></a> to indicate that the last (and only) argument to these functions is optional.</p><p>Next, we can define a function to move the turtle in the direction its facing:</p><pre><code>let move_by n =
+  if not @@ Guile.Number.is_integer n then
+    failwith &quot;expected numeric arg&quot;;
+  let n = Guile.Number.int_from_raw n in
+  let x, y =
+    let cur_pos = Graphics.current_point () in
+    move n cur_pos !direction in
+  if !pen_down then
+    Graphics.lineto x y;
+  Graphics.moveto x y;
+  Guile.eol
+
+let () = ignore @@ Guile.Functions.register_fun1 &quot;move-by&quot; move_by</code></pre><p>Finally, a &quot;warping&quot; function to quickly jump the turtle to a pre-defined location on the screen:</p><pre><code>let move_to x y =
+  if (not @@ Guile.Number.is_integer x) ||
+     (not @@ Guile.Number.is_integer y) then
+    failwith &quot;expected numeric position&quot;;
+  let x, y = 
+    Guile.Number.int_from_raw x,
+    Guile.Number.int_from_raw y in
+  if !pen_down then
+    Graphics.lineto x y;
+  Graphics.moveto x y;
+  Guile.eol
+
+let () = ignore @@ Guile.Functions.register_fun2 &quot;move-to&quot; move_to</code></pre><p>Putting things all together, we can then complete our drawing program by simply initialising the <code>Graphics</code> context and then starting a Guile repl:</p><pre><code>let () =
+  (* setup graphics context *)
+  Graphics.open_graph &quot; 400x400+50-0&quot;;
+  Graphics.auto_synchronize true;
+  Graphics.moveto 200 200;
+  (* start guile repl *)
+  Guile.shell ()</code></pre><p>With that, we're done! Congratulations! You now have a functional Guile Scheme repl which can be used to tune and extend your drawing program!</p><p>Having completed this tutorial, you should be all set to try extending your OCaml programs with Guile scheme! Please also check out the <a href="Guile/index.html">API documentation</a> to find out more specific information on how you can use ocaml-guile for your particular use case.</p></div></body></html>
