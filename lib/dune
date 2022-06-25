@@ -4,7 +4,6 @@
  (libraries ctypes ctypes.foreign str bindings sexplib)
  (c_library_flags (:include c_library_flags.sexp))
  (ocamlopt_flags (-ccopt (:include ccopts.sexp)))
- (preprocess (pps ppx_deriving.std ppx_deriving.ord))
  (foreign_stubs
   (language c)
   (names guile_stubs)

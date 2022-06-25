@@ -6,14 +6,14 @@ description:
 maintainer: ["kirang@comp.nus.edu.sg"]
 authors: ["Kiran Gopinathan"]
 license: "GPL-3.0+"
-homepage: "https://gitlab.com/gopiandcode/guile-ocaml"
-bug-reports: "https://gitlab.com/gopiandcode/guile-ocaml/issues"
+homepage: "https://github.com/gopiandcode/guile-ocaml"
+bug-reports: "https://github.com/gopiandcode/guile-ocaml/issues"
 depends: [
   "dune" {>= "2.9"}
   "ocaml" {>= "4.08.0"}
-  "conf-swi-prolog" {>= "1"}
+  "sexplib" {>= "v0.12"}
   "ctypes" {>= "0.18.0"}
-  "ppx_deriving" {>= "2.0"}
+  "ctypes-foreign" {>= "0.18.0"}
   "dune-configurator" {>= "2.9.1"}
   "odoc" {with-doc}
 ]
@@ -33,4 +33,4 @@ build: [
   ]
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
-dev-repo: "git+https://gitlab.com/gopiandcode/guile-ocaml.git"
+dev-repo: "git+https://github.com/gopiandcode/guile-ocaml.git"
