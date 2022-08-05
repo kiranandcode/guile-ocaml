@@ -35,7 +35,8 @@ let () =
     let default : C.Pkg_config.package_conf =
       { libs   = ["-lguile-3.0"; "-lgc"; "-lpthread"; "-ldl"; "-lffi"]
       ; cflags = ["-O2"; "-Wall"; "-Wextra"; "-Wno-unused-parameter"; "-pthread";
-                  "-I/usr/include/guile/3.0"]
+                  "-I/usr/include/guile/3.0";
+                  "-I/usr/include"]
       }
     in
     let default_ffi : C.Pkg_config.package_conf =
